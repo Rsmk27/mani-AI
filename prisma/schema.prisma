@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  apiKeys      ApiKey[]
+}
+
+model ApiKey {
+  id           String    @id @default(uuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String
+  keyHash      String    @unique
+  keyPrefix    String    // e.g. "mani_live_82HSHS"
+  keyDisplay   String    // e.g. "mani_live_82HS...JSJ2"
+  status       String    @default("ACTIVE") // ACTIVE, INACTIVE
+  rateLimit    Int       @default(100) // requests per day
+  requestCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  lastUsed     DateTime?
+  logs         ApiLog[]
+}
+
+model ApiLog {
+  id           String    @id @default(uuid())
+  apiKeyId     String
+  apiKey       ApiKey    @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  endpoint     String
+  timestamp    DateTime  @default(now())
+  responseTime Int       // in milliseconds
+  statusCode   Int
+  ipAddress    String?
+  userAgent    String?
+  errorMessage String?
+}
