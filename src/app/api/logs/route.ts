@@ -32,7 +32,7 @@ export async function GET(request: Request) {
       where: { userId: payload.userId },
       select: { id: true },
     });
-    const userKeyIds = userKeys.map((k) => k.id);
+    const userKeyIds = userKeys.map((k: { id: string }) => k.id);
 
     // Build query conditions
     const where: any = {

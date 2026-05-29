@@ -22,8 +22,8 @@ export async function GET() {
       where: { userId: payload.userId },
       select: { id: true, status: true, requestCount: true },
     });
-    const keyIds = keys.map((k) => k.id);
-    const activeKeysCount = keys.filter((k) => k.status === 'ACTIVE').length;
+    const keyIds = keys.map((k: { id: string }) => k.id);
+    const activeKeysCount = keys.filter((k: { status: string }) => k.status === 'ACTIVE').length;
 
     // 2. Fetch logs for these keys
     const logs = await db.apiLog.findMany({
@@ -34,14 +34,14 @@ export async function GET() {
     const totalRequests = logs.length;
     
     // Calculate success rate (status codes < 400)
-    const successfulRequests = logs.filter((l) => l.statusCode < 400).length;
+    const successfulRequests = logs.filter((l: { statusCode: number }) => l.statusCode < 400).length;
     const successRate = totalRequests > 0 
       ? Math.round((successfulRequests / totalRequests) * 100) 
       : 100;
 
     // Calculate average response time
     const averageLatency = totalRequests > 0
-      ? Math.round(logs.reduce((sum, l) => sum + l.responseTime, 0) / totalRequests)
+      ? Math.round(logs.reduce((sum: number, l: { responseTime: number }) => sum + l.responseTime, 0) / totalRequests)
       : 0;
 
     // 3. Generate chart trend data for the last 7 days
@@ -56,7 +56,7 @@ export async function GET() {
     }
 
     // Populate trend from logs
-    logs.forEach((log) => {
+    logs.forEach((log: { timestamp: Date; statusCode: number }) => {
       const dateString = log.timestamp.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       if (trendMap.has(dateString)) {
         const dayData = trendMap.get(dateString)!;
